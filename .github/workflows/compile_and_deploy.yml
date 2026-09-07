@@ -1,1 +1,36 @@
+name: Automated LaTeX Compilation and Deployment
 
+on:
+  push:
+    branches:
+      - main  # Сработает при отправке кода в ветку main
+
+permissions:
+  contents: write  # Разрешение на создание ветки gh-pages
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest  # Контейнер с LaTeX [с. 7]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX to PDF
+        run: |
+          xelatex -interaction=nonstopmode CKMS-2026_AHA.tex  
+          xelatex -interaction=nonstopmode CKMS-2026_AHA.tex  
+
+      - name: Prepare folder for Pages
+        run: |
+          mkdir -p public
+          cp CKMS-2026_AHA.pdf public/CKMS-2026_AHA.pdf 
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
